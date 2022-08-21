@@ -3,9 +3,11 @@ using dotnet_6_web_api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace dotnet_6_web_api.Controllers
+namespace dotnet_6_web_api.Controllersv2_0
 {
-    [Route("api/[controller]")]
+    [ApiVersion("2.0")]
+    [ApiVersion("3.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -21,11 +23,20 @@ namespace dotnet_6_web_api.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllProducts()
         {
-            IQueryable<Product> products = _context.Products; 
+            IQueryable<Product> products = _context.Products.Take(3);
+            return Ok(await products.ToArrayAsync());
+        }
+
+        [HttpGet]
+        [MapToApiVersion("3.0")]
+        public async Task<ActionResult> GetAllProductsV3()
+        {
+            IQueryable<Product> products = _context.Products.Take(10);
             return Ok(await products.ToArrayAsync());
         }
 
         [HttpGet("{id}")]
+
         public async Task<ActionResult> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
